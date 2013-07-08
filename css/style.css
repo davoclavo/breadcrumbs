@@ -48,9 +48,8 @@ body {
 -------------------------------------------------- */
 /* Not required for template or sticky footer method. */
 
-.container .credit {
-  margin: 20px 0;
-  text-align: center;
+.container.content {
+  margin-top: 30px;
 }
 
 /* Maps */
