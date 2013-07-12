@@ -25,11 +25,12 @@ var router = new (Backbone.Router.extend({
 
     loadTrail();
   }
-}))
+}));
 
-console.log("router: ", router)
+console.log("router: ", router);
 
 Backbone.history.start({pushState: false});
+
 
 
 // crumbs.push({
@@ -56,7 +57,94 @@ $(document).ready(function(){
 
 });
 
-function loadTrail() {
+function loadTrail(){
+  var User = Backbone.Model.extend({
+    getGooglePosition: function(){
+      return new google.maps.LatLng(this.get('lat'), this.get('lng'));
+    }
+  });
+
+  var UserList = Backbone.Firebase.Collection.extend({
+    model: User,
+    firebase: trail.child('users'),
+    myself: function(){
+      if (!this._myself){
+        //TODO: Buscarlo en session storage
+        this._myself = new User();
+        this.add(this._myself);
+      }
+      return this._myself;
+    },
+    setMyself: function(user){
+      this._myself = user;
+      return this;
+    }
+  });
+
+  var users = new UserList();
+
+  users.on('add',function(user){
+    var view = new UserView({model: user});
+    view.render();
+  });
+
+  var UserView = Backbone.View.extend({
+    initialize: function(){
+      this.listenTo(this.model, "change", this.render);
+
+      var user = this.model;
+
+      var color = user.get('isOwner') ? 'FF0000' : '0000FF';
+      this.marker = map.addMarker({
+        lat: user.get('lat'),
+        lng: user.get('lng'),
+        icon: colorIcon(color),
+        shadow: pinShadow
+      });
+    },
+    render: function(){
+      // Updatear las coordenadas del marker
+      //TODO: Usar animate
+      // this.marker.setPosition(this.model.getGooglePosition());
+      this.marker.animatedMoveTo(this.model.get('lat'), this.model.get('lng'));
+    }
+  });
+
+
+  navigator.geolocation.getCurrentPosition(function(pos){
+
+    var myself = new User({
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    });
+
+    users.setMyself(myself);
+
+    var updaterInterval = setInterval(pollMyPosition, 1000);
+
+  });
+
+
+
+
+  var updateMyPosition = function(pos){
+    console.dir(pos)
+    users.myself().set({
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    })
+  }
+
+  var pollMyPosition = function(){
+    navigator.geolocation.getCurrentPosition(updateMyPosition);
+  }
+
+}
+
+
+
+
+function loadTrailOld() {
 
   var localUsers = {};
 
