@@ -9,7 +9,7 @@ import com.firebase.client.Firebase;
  */
 public class BaseActivity extends Activity {
 
-    private static final String FIREBASE_URL = "https://breadcr";
+    private static final String FIREBASE_URL = "https://breadcrumbs.firebaseio.com/";
 
     public Firebase getFirebase() {
         return new Firebase(FIREBASE_URL);
