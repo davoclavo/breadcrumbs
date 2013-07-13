@@ -11,47 +11,82 @@
   var myself = trailNode.child(myselfID);
 
 
-  var friendsMarkers = {};
-
+  var friendsAvatars = {};
 
   var map = null;
-  var marker = null;
 
   var initMap = function() {
-    var pos = {
+    var info = {
       lat: 19.386472899999998,
-      lng: -99.1618527
+      lng: -99.1618527,
+      id:    myselfID,
+      email: myselfID + '@breadcrumbs',
+      status: "OMW"
     }
     map = new GMaps({
       div: '#map',
-      lat: pos.lat,
-      lng: pos.lng
+      lat: info.lat,
+      lng: info.lng
     });
-    marker = map.addMarker(pos)
+
+    console.log("I AM ", info)
+    friendsAvatars[myselfID] = createAvatar(info)
+
     map.setZoom(22);
   }
 
-  var updateClientMarker = function(clientId, clientPosition) {
-    console.log("Updating my friend position ", clientId, clientPosition);
-    var clientMarker = friendsMarkers[clientId];
-    if (clientMarker) {
-      var googlePosition = new google.maps.LatLng(clientPosition.lat, clientPosition.lng);
-      clientMarker.setPosition(googlePosition);
+
+  var createAvatar = function(info) {
+    var marker = map.addMarker({lat: info.lat, lng: info.lng})
+    marker.setVisible(false);
+    var overlay = map.drawOverlay({
+      lat: info.lat,
+      lng: info.lng,
+      content: "<div id='"+info.email+"' class='guy'><img class='avatar' src='http://avatars.io/email/"+info.email+"'/><h6 class='status'>"+info.status+"</h6></div>"
+    })
+    var avatar = {
+      marker: marker,
+      overlay: overlay,
+      info: info
+    }
+    return avatar;
+  }
+
+  var redrawAvatar = function(avatar) {
+    return function(googlePos) {
+      var info = avatar.info;
+      var content = "<div id='"+info.email+"' class='guy'><img class='avatar' src='http://avatars.io/email/"+info.email+"'/><h6 class='status'>"+info.status+"</h6></div>";
+      avatar.overlay.setMap(null);
+      avatar.overlay = map.drawOverlay({
+        lat: googlePos.lat(),
+        lng: googlePos.lng(),
+        content: content
+      })
+    }
+  }
+
+  var updateClientAvatar = function(clientId, clientInfo) {
+    var friendAvatar = friendsAvatars[clientId];
+    if (friendAvatar) {
+
+      friendAvatar.marker.animatedMoveTo(clientInfo.lat, clientInfo.lng, redrawAvatar(friendAvatar))
+
     } else {
-      clientMarker = map.addMarker(clientPosition);
-      friendsMarkers[clientId] = clientMarker;
+
+      friendAvatar = createAvatar(clientInfo);
+      friendsAvatars[clientId] = friendAvatar;
+
     }
   }
 
   var updateMyPosition = function() {
     navigator.geolocation.getCurrentPosition(function(geo){
-      var pos = { lat: geo.coords.latitude, lng: geo.coords.longitude };
 
-      myself.set(pos);
+      var avatar = friendsAvatars[myselfID];
+      avatar.info.lat = geo.coords.latitude;
+      avatar.info.lng = geo.coords.longitude;
 
-
-      marker.animatedMoveTo(pos.lat, pos.lng);
-
+      myself.set(avatar.info);
       setTimeout(updateMyPosition, 1000);
 
     }, function(error) {
@@ -63,21 +98,40 @@
     var client = clientSnapshot.val();
     if (client) {
       var clientId = clientSnapshot.name();
-      if (clientId != myselfID) {
-        updateClientMarker(clientId, client);
-      }
+      updateClientAvatar(clientId, client);
+    }
+  }
+
+  var removeClient = function(clientSnapshot) {
+    var clientId = clientSnapshot.name();
+    var friendAvatar = friendsAvatars[clientId];
+    if(friendAvatar) {
+      friendAvatar.marker.setMap(null);
+      friendAvatar.overlay.setMap(null);
+      delete friendsAvatars[clientId];
     }
   }
 
   var drawClients = function() {
     trailNode.on('child_added', drawClient);
     trailNode.on('child_changed', drawClient);
+    trailNode.on('child_removed', removeClient);
   }
 
   $(document).ready(function() {
     initMap();
     setTimeout(updateMyPosition, 1000);
     drawClients();
+
+
+    $('input[name=email]').on('blur', function(){
+      var email = $(this).val();
+      var avatar = friendsAvatars[myselfID];
+      avatar.info.email = email;
+      myself.set(avatar.info);
+    })
+
+
   })
 
 

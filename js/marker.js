@@ -4,7 +4,7 @@ function feq (f1, f2) {
 
 // hack to animated/move the Marker class -vikrum
 // based on http://stackoverflow.com/a/10906464
-google.maps.Marker.prototype.animatedMoveTo = function(toLat, toLng) {
+google.maps.Marker.prototype.animatedMoveTo = function(toLat, toLng, onStep) {
   var fromLat = this.getPosition().lat();
   var fromLng = this.getPosition().lng();
   if(feq(fromLat, toLat) && feq(fromLng, toLng))
@@ -19,7 +19,8 @@ google.maps.Marker.prototype.animatedMoveTo = function(toLat, toLng) {
 
   move = function(marker, latlngs, index, wait) {
     marker.setPosition(latlngs[index]);
-     if(index != latlngs.length-1) {
+    if(onStep) { onStep(latlngs[index]); }
+    if(index != latlngs.length-1) {
       // call the next "frame" of the animation
       setTimeout(function() {
         move(marker, latlngs, index+1, wait);
@@ -30,3 +31,4 @@ google.maps.Marker.prototype.animatedMoveTo = function(toLat, toLng) {
   // begin animation, send back to origin after completion
   move(this, frames, 0, 25);
 };
+
