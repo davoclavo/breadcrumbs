@@ -1,4 +1,6 @@
-breadcrumbs
-===========
+Breadcrumbs
+-----------
 
-Follow your friend's trails. Powered by Firebase
+A Just For Fun(tm) project.
+
+Learning happens while getting fun.
