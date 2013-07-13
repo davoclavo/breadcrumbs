@@ -4,11 +4,14 @@
   var firebase = new Firebase("https://breadcrumbsapp.firebaseio.com/");
 
 
-  var channelName = "hackathon";
-  var channelNode = firebase.child("channels/" + channelName);
+  var trailName = "hackathon";
+  var trailNode = firebase.child("trails/" + trailName);
 
-  var clientID = randomHex(6);
-  var myself = channelNode.child(clientID);
+  var myselfID = randomHex(6);
+  var myself = trailNode.child(myselfID);
+
+
+  var friendsMarkers = {};
 
 
   var map = null;
@@ -28,6 +31,18 @@
     map.setZoom(22);
   }
 
+  var updateClientMarker = function(clientId, clientPosition) {
+    console.log("Updating my friend position ", clientId, clientPosition);
+    var clientMarker = friendsMarkers[clientId];
+    if (clientMarker) {
+      var googlePosition = new google.maps.LatLng(clientPosition.lat, clientPosition.lng);
+      clientMarker.setPosition(googlePosition);
+    } else {
+      clientMarker = map.addMarker(clientPosition);
+      friendsMarkers[clientId] = clientMarker;
+    }
+  }
+
   var updateMyPosition = function() {
     navigator.geolocation.getCurrentPosition(function(geo){
       var pos = { lat: geo.coords.latitude, lng: geo.coords.longitude };
@@ -44,9 +59,25 @@
     }, {timeout: 1000});
   }
 
+  var drawClient = function(clientSnapshot) {
+    var client = clientSnapshot.val();
+    if (client) {
+      var clientId = clientSnapshot.name();
+      if (clientId != myselfID) {
+        updateClientMarker(clientId, client);
+      }
+    }
+  }
+
+  var drawClients = function() {
+    trailNode.on('child_added', drawClient);
+    trailNode.on('child_changed', drawClient);
+  }
+
   $(document).ready(function() {
     initMap();
     setTimeout(updateMyPosition, 1000);
+    drawClients();
   })
 
 
