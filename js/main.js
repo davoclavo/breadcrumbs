@@ -27,16 +27,8 @@ var router = new (Backbone.Router.extend({
   }
 }));
 
-console.log("router: ", router);
 
 Backbone.history.start({pushState: false});
-
-
-
-// crumbs.push({
-//   lat: -12.043333,
-//   lng: -77.028333
-// });
 
 $(document).ready(function(){
   map = new GMaps({
@@ -120,7 +112,7 @@ function loadTrail(){
 
     users.setMyself(myself);
 
-    var updaterInterval = setInterval(pollMyPosition, 1000);
+    var updaterInterval = setInterval(pollMyPosition, 4000);
 
   });
 
@@ -128,7 +120,7 @@ function loadTrail(){
 
 
   var updateMyPosition = function(pos){
-    console.dir(pos)
+    console.log("YOUR NEW POSITION IS ", pos)
     users.myself().set({
       lat: pos.coords.latitude,
       lng: pos.coords.longitude
@@ -136,6 +128,7 @@ function loadTrail(){
   }
 
   var pollMyPosition = function(){
+    console.log("GETTING YOUR BROWSER POSITION")
     navigator.geolocation.getCurrentPosition(updateMyPosition);
   }
 
@@ -223,18 +216,3 @@ function loadTrailOld() {
 }
 
 
-// http://stackoverflow.com/a/7686977/756000
-function colorIcon(color){
-  // var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld=|" + color,
-  var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|" + color,
-          new google.maps.Size(21, 34),
-          new google.maps.Point(0,0),
-          new google.maps.Point(10, 34));
-  return pinImage;
-}
-
-function randomHex(len) {
-  return (new Array(len).join(0)
-          + parseInt(Math.pow(2, len * 4) * Math.random()
-                    ).toString(16)).slice(-len);
-}
