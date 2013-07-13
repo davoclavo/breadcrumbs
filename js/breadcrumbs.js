@@ -29,10 +29,9 @@
       lng: info.lng
     });
 
-    console.log("I AM ", info)
     friendsAvatars[myselfID] = createAvatar(info)
 
-    map.setZoom(22);
+    map.setZoom(18);
   }
 
 
@@ -79,14 +78,23 @@
     }
   }
 
+
   var updateMyPosition = function() {
     navigator.geolocation.getCurrentPosition(function(geo){
 
       var avatar = friendsAvatars[myselfID];
-      avatar.info.lat = geo.coords.latitude;
-      avatar.info.lng = geo.coords.longitude;
 
-      myself.set(avatar.info);
+      // si la distancia es mayor de 0.0001 actualizamos
+      var distance = latLngDistance(avatar.info, {lat: geo.coords.latitude, lng: geo.coords.longitude});
+
+      if (distance > 0.0001) {
+
+        avatar.info.lat = geo.coords.latitude;
+        avatar.info.lng = geo.coords.longitude;
+        myself.set(avatar.info);
+
+      }
+
       setTimeout(updateMyPosition, 1000);
 
     }, function(error) {
@@ -104,6 +112,7 @@
 
   var removeClient = function(clientSnapshot) {
     var clientId = clientSnapshot.name();
+    if (clientId == myselfID) { return; }
     var friendAvatar = friendsAvatars[clientId];
     if(friendAvatar) {
       friendAvatar.marker.setMap(null);
@@ -128,6 +137,13 @@
       var email = $(this).val();
       var avatar = friendsAvatars[myselfID];
       avatar.info.email = email;
+      myself.set(avatar.info);
+    })
+
+    $('input[name=status]').on('blur', function(){
+      var status = $(this).val();
+      var avatar = friendsAvatars[myselfID];
+      avatar.info.status = status;
       myself.set(avatar.info);
     })
 

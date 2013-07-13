@@ -15,3 +15,9 @@ function randomHex(len) {
                     ).toString(16)).slice(-len);
 }
 
+
+function latLngDistance(a, b) {
+  var x = b.lat - a.lat;
+  var y = b.lng - a.lng;
+  return Math.sqrt( (x*x) + (y*y) );
+}
