@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/BreadcrumbsApp/libs/android-support-v4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/BreadcrumbsApp/libs/firebase-client-jvm-LATEST.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
