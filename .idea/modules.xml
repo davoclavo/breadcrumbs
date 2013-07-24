@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/BreadcrumbsApp/BreadcrumbsApp.iml" filepath="$PROJECT_DIR$/BreadcrumbsApp/BreadcrumbsApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/BreadcrumbsAppProject.iml" filepath="$PROJECT_DIR$/BreadcrumbsAppProject.iml" />
       <module fileurl="file://$PROJECT_DIR$/breadcrumbs.iml" filepath="$PROJECT_DIR$/breadcrumbs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/breadcrumbs-android.iml" filepath="$PROJECT_DIR$/breadcrumbs-android.iml" />
     </modules>
   </component>
 </project>
